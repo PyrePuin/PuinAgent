@@ -1,0 +1,8 @@
+[project]
+name = "puin-agent"
+version = "0.1.0"
+description = "A lightweight Agent framework built from scratch"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.0.0",
+]
