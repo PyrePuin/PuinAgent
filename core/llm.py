@@ -107,3 +107,8 @@ def call_llm(messages: list[dict[str, Any]],
     if message.tool_calls:
         result["tool_calls"] = [tool_call.model_dump() for tool_call in message.tool_calls]
     return result
+
+if __name__ == "__main__":
+    prompt = "请介绍一下 Python 中的 asyncio 模块。"
+    response = call_llm_simple(prompt)
+    print(response)

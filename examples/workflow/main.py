@@ -15,4 +15,41 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from core.llm import call_llm_simple
 from core.node import Node, Flow
 
+class QueryNode(Node):
+    def exec(self, payload: Any) -> Tuple[str, Any]:
+        return "search", str(payload)
 
+class SearchNode(Node):
+    """搜索节点"""
+    def exec(self, payload: Any) -> Tuple[str, Any]:
+        # 模拟搜索结果
+        results = search_ddgs(str(payload), max_results=3)
+        titles = [r.get("title") or r.get("body") or "No Title" for r in results]
+        summary_input = "|".join([t for t in titles if t])
+        return "summarize", summary_input
+    
+class SummarizeNode(Node):
+    """总结节点"""
+    def exec(self, payload: Any) -> Tuple[str, Any]:
+        prompt = f"基于以下要点写一句话摘要：{payload}"
+        summary = call_llm_simple(prompt)
+        return "default", summary
+    
+def main() -> None:
+    """运行工作流"""
+    if not os.environ.get("OPENAI_API_DEEPSEEK"):
+        print("提示：请先设置环境变量 OPENAI_API_DEEPSEEK，才能运行这个示例。")
+        return
+    query = QueryNode()
+    search = SearchNode()
+    summarize = SummarizeNode()
+
+    query - "search" >> search
+    search - "summarize" >> summarize
+
+    flow = Flow(start=query)
+    _, result = flow.run("Python asyncio 最佳实践")
+    print("最终结果：", result)
+
+if __name__ == "__main__":
+    main()
